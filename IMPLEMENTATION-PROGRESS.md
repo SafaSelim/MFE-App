@@ -20,13 +20,13 @@ Tracking implementation progress for MFE Monorepo improvements.
 ## Phase 2: Implement Google OAuth SSO
 | Status | Task | Description |
 |--------|------|-------------|
-| [ ] | 2.1 Install Google OAuth Dependencies | Add @react-oauth/google and jwt-decode |
-| [ ] | 2.2 Update Auth-SDK Types | Extend User interface with Google fields |
-| [ ] | 2.3 Add GoogleAuthService | Create service for Google OAuth token processing |
-| [ ] | 2.4 Wrap Host with GoogleOAuthProvider | Add provider in bootstrap.tsx |
-| [ ] | 2.5 Update Login Page | Replace form with Google Sign-In button |
-| [ ] | 2.6 Create Environment Configuration | Add .env for Google Client ID |
-| [ ] | 2.7 Test Cross-MFE Auth Sync | Verify auth state syncs across all apps |
+| [x] | 2.1 Install Google OAuth Dependencies | Add @react-oauth/google and jwt-decode |
+| [x] | 2.2 Update Auth-SDK Types | Extend User interface with Google fields |
+| [x] | 2.3 Add GoogleAuthService | JWT decoding in login-page.tsx |
+| [x] | 2.4 Wrap Host with GoogleOAuthProvider | Add provider in bootstrap.tsx |
+| [x] | 2.5 Update Login Page | Replace form with Google Sign-In button |
+| [x] | 2.6 Create Environment Configuration | Add .env and .env.example for Google Client ID |
+| [x] | 2.7 Test Cross-MFE Auth Sync | Verified - uses localStorage + CustomEvent ('auth-changed') |
 
 ---
 

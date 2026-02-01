@@ -1,6 +1,8 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+const webpack = require("webpack");
 const path = require("path");
+require("dotenv").config();
 
 module.exports = {
   mode: 'development',
@@ -77,6 +79,11 @@ module.exports = {
     }),
     new HtmlWebPackPlugin({
       template: "./public/index.html",
+    }),
+    new webpack.DefinePlugin({
+      "process.env.REACT_APP_GOOGLE_CLIENT_ID": JSON.stringify(
+        process.env.REACT_APP_GOOGLE_CLIENT_ID || ""
+      ),
     }),
   ],
 };

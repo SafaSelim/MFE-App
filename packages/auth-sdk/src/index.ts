@@ -4,6 +4,10 @@ export interface User {
   id: string;
   username: string;
   roles: string[];
+  email?: string;
+  picture?: string;
+  name?: string;
+  provider?: 'local' | 'google';
 }
 
 const TOKEN_KEY = 'mfe_auth_token';

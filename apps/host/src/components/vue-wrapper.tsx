@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 interface MountResult {
@@ -24,11 +24,24 @@ export default function VueWrapper({ vueModule, basePath }: VueWrapperProps) {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Use refs to avoid stale closures in the onNavigate callback
+  const locationRef = useRef(location.pathname);
+  const navigateRef = useRef(navigate);
+
+  // Keep refs up to date
+  useEffect(() => {
+    locationRef.current = location.pathname;
+  }, [location.pathname]);
+
+  useEffect(() => {
+    navigateRef.current = navigate;
+  }, [navigate]);
+
   // Extract the sub-path after the base path (e.g., /vue/dashboard -> /dashboard)
-  const getSubPath = (pathname: string) => {
+  const getSubPath = useCallback((pathname: string) => {
     const subPath = pathname.replace(basePath, '') || '/';
     return subPath.startsWith('/') ? subPath : '/' + subPath;
-  };
+  }, [basePath]);
 
   useEffect(() => {
     if (containerRef.current && !mountResultRef.current && vueModule?.mount) {
@@ -38,9 +51,10 @@ export default function VueWrapper({ vueModule, basePath }: VueWrapperProps) {
         initialPath: initialSubPath,
         onNavigate: (vuePath: string) => {
           // When Vue navigates internally, update React Router
+          // Use refs to get current values (avoid stale closure)
           const fullPath = basePath + (vuePath === '/' ? '' : vuePath);
-          if (location.pathname !== fullPath) {
-            navigate(fullPath, { replace: true });
+          if (locationRef.current !== fullPath) {
+            navigateRef.current(fullPath, { replace: true });
           }
         },
       });
@@ -52,7 +66,7 @@ export default function VueWrapper({ vueModule, basePath }: VueWrapperProps) {
         mountResultRef.current = null;
       }
     };
-  }, [vueModule]);
+  }, [vueModule, basePath, getSubPath]);
 
   // Sync React Router location changes to Vue Router
   useEffect(() => {
@@ -60,7 +74,7 @@ export default function VueWrapper({ vueModule, basePath }: VueWrapperProps) {
       const subPath = getSubPath(location.pathname);
       mountResultRef.current.setPath(subPath);
     }
-  }, [location.pathname]);
+  }, [location.pathname, getSubPath]);
 
   return <div ref={containerRef} />;
 }

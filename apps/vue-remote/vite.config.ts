@@ -41,5 +41,15 @@ export default defineConfig({
     target: 'chrome89',
     minify: false,
     cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.css')) {
+            return 'assets/style.css'
+          }
+          return 'assets/[name]-[hash][extname]'
+        },
+      },
+    },
   },
 })

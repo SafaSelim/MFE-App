@@ -79,12 +79,21 @@ function App() {
                 {isAuthenticated ? (
                   <>
                     <div className="hidden md:flex items-center space-x-2 text-sm text-gray-700">
-                      <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span className="text-primary-700 font-semibold">
-                          {user?.username.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <span className="font-medium">{user?.username}</span>
+                      {user?.picture ? (
+                        <img
+                          src={user.picture}
+                          alt={user.name || user.username}
+                          className="w-8 h-8 rounded-full"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                          <span className="text-primary-700 font-semibold">
+                            {user?.username.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <span className="font-medium">{user?.name || user?.username}</span>
                     </div>
                     <button
                       onClick={logout}

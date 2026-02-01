@@ -1,31 +1,52 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@mfe/auth-sdk';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
+import { useAuth, User } from '@mfe/auth-sdk';
+
+interface GoogleJwtPayload {
+  sub: string;
+  email: string;
+  name: string;
+  picture: string;
+  given_name?: string;
+  family_name?: string;
+}
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleGoogleSuccess = (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) {
+      setError('No credential received from Google');
+      return;
+    }
 
-    // Fake API call
-    setTimeout(() => {
-      const fakeToken = btoa(`${username}:${Date.now()}`);
-      const user = {
-        id: '1',
-        username,
+    try {
+      const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
+
+      const user: User = {
+        id: decoded.sub,
+        username: decoded.email.split('@')[0],
+        email: decoded.email,
+        name: decoded.name,
+        picture: decoded.picture,
         roles: ['user'],
+        provider: 'google',
       };
 
-      login(fakeToken, user);
+      login(credentialResponse.credential, user);
       navigate('/');
-      setLoading(false);
-    }, 1000);
+    } catch (err) {
+      setError('Failed to process Google login');
+      console.error('Google login error:', err);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError('Google login failed. Please try again.');
   };
 
   return (
@@ -43,66 +64,34 @@ export default function LoginPage() {
               Welcome Back
             </h2>
             <p className="text-gray-600">
-              Login to access MFE applications
+              Sign in to access MFE applications
             </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter your username"
-                required
-                autoFocus
-                className="input-field"
-              />
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-800 text-center">{error}</p>
             </div>
+          )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-                className="input-field"
-              />
-            </div>
+          {/* Google Sign In */}
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              width="300"
+              text="signin_with"
+              shape="rectangular"
+            />
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn-primary flex items-center justify-center space-x-2"
-            >
-              {loading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Logging in...</span>
-                </>
-              ) : (
-                <span>Login</span>
-              )}
-            </button>
-          </form>
-
-          {/* Demo Hint */}
+          {/* Info */}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800 text-center">
-              <strong>Demo Mode:</strong> Any username/password will work
+              Sign in with your Google account to access all micro frontend applications
             </p>
           </div>
         </div>
