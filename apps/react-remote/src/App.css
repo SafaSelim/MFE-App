@@ -1,0 +1,63 @@
+.react-remote {
+  border: 3px solid #61dafb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.remote-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.remote-header h2 {
+  margin: 0 0 0.5rem 0;
+}
+
+.remote-nav {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+.remote-nav a {
+  color: #667eea;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.remote-nav a:hover {
+  background: #667eea;
+  color: white;
+}
+
+.remote-content {
+  padding: 1rem;
+}
+
+.remote-content h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.remote-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.remote-content li {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #f8f9fa;
+  border-left: 4px solid #667eea;
+  border-radius: 4px;
+}

@@ -1,0 +1,82 @@
+const HtmlWebPackPlugin = require("html-webpack-plugin");
+const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+const path = require("path");
+
+module.exports = {
+  mode: 'development',
+  output: {
+    publicPath: "http://localhost:3000/",
+    path: path.resolve(__dirname, "dist"),
+  },
+  resolve: {
+    extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
+  },
+  devServer: {
+    port: 3000,
+    historyApiFallback: true,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  },
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        loader: "ts-loader",
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: [
+          "style-loader",
+          "css-loader",
+          {
+            loader: "postcss-loader",
+            options: {
+              postcssOptions: {
+                plugins: [
+                  require("tailwindcss"),
+                  require("autoprefixer"),
+                ],
+              },
+            },
+          },
+        ],
+      },
+    ],
+  },
+  plugins: [
+    new ModuleFederationPlugin({
+      name: "host",
+      remotes: {
+        reactRemote: "reactRemote@http://localhost:3001/remoteEntry.js",
+        vueRemote: "vueRemote@http://localhost:3002/remoteEntry.js",
+      },
+      shared: {
+        react: {
+          singleton: true,
+          requiredVersion: "^19.0.0",
+        },
+        "react-dom": {
+          singleton: true,
+          requiredVersion: "^19.0.0",
+        },
+        "react-router-dom": {
+          singleton: true,
+          requiredVersion: "^6.0.0",
+        },
+        vue: {
+          singleton: true,
+          requiredVersion: "^3.4.0",
+        },
+        "vue-router": {
+          singleton: true,
+          requiredVersion: "^4.2.0",
+        },
+      },
+    }),
+    new HtmlWebPackPlugin({
+      template: "./public/index.html",
+    }),
+  ],
+};
