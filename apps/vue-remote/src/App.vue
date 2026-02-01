@@ -61,7 +61,7 @@ interface User {
 const user = ref<User | null>(null)
 
 const handleAuthChange = () => {
-  const userStr = localStorage.getItem('mfe_user')
+  const userStr = sessionStorage.getItem('mfe_user')
   user.value = userStr ? JSON.parse(userStr) : null
 }
 

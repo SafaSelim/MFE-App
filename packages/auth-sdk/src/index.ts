@@ -15,8 +15,8 @@ const USER_KEY = 'mfe_user';
 
 export class AuthService {
   static setAuth(token: string, user: User): void {
-    localStorage.setItem(TOKEN_KEY, token);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(USER_KEY, JSON.stringify(user));
     
     window.dispatchEvent(new CustomEvent('auth-changed', { 
       detail: { token, user } 
@@ -24,17 +24,17 @@ export class AuthService {
   }
 
   static getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return sessionStorage.getItem(TOKEN_KEY);
   }
 
   static getUser(): User | null {
-    const userStr = localStorage.getItem(USER_KEY);
+    const userStr = sessionStorage.getItem(USER_KEY);
     return userStr ? JSON.parse(userStr) : null;
   }
 
   static logout(): void {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_KEY);
     
     window.dispatchEvent(new CustomEvent('auth-changed', { 
       detail: { token: null, user: null } 
