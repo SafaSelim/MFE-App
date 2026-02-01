@@ -1,9 +1,17 @@
-import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { lazy, Suspense, useState, createContext, useContext } from 'react';
+import { BrowserRouter, Routes, Route, Link, Navigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@mfe/auth-sdk';
 import ProtectedRoute from './components/protected-route';
 import VueWrapper from './components/vue-wrapper';
 import LoginPage from './pages/login-page';
+
+// Context to track which MFE app is "active"
+const MFEContext = createContext<{
+  activeApp: 'react' | 'vue' | null;
+  setActiveApp: (app: 'react' | 'vue' | null) => void;
+}>({ activeApp: null, setActiveApp: () => {} });
+
+const useMFEContext = () => useContext(MFEContext);
 
 const ReactRemoteApp = lazy(() => import('reactRemote/App'));
 
@@ -28,11 +36,38 @@ const VueRemoteLazy = lazy(() =>
   }))
 );
 
+// Shared route component - decides which app based on query param or context
+function SharedRoute() {
+  const [searchParams] = useSearchParams();
+  const { activeApp } = useMFEContext();
+
+  // Priority: 1. Query param (?app=react), 2. Context, 3. Default to React
+  const appParam = searchParams.get('app') as 'react' | 'vue' | null;
+  const targetApp = appParam || activeApp || 'react';
+
+  if (targetApp === 'vue') {
+    return <VueRemoteLazy />;
+  }
+  return <ReactRemoteApp />;
+}
+
 function App() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const [activeApp, setActiveApp] = useState<'react' | 'vue' | null>(null);
 
   return (
-    <BrowserRouter>
+    <MFEContext.Provider value={{ activeApp, setActiveApp }}>
+      <BrowserRouter>
+        <AppContent />
+      </BrowserRouter>
+    </MFEContext.Provider>
+  );
+}
+
+function AppContent() {
+  const { isAuthenticated, user, logout } = useAuth();
+  const { setActiveApp, activeApp } = useMFEContext();
+
+  return (
       <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-100">
         {/* Navbar */}
         <nav className="bg-white shadow-lg">
@@ -60,15 +95,23 @@ function App() {
                     </Link>
                     <Link
                       to="/react"
-                      className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                      onClick={() => setActiveApp('react')}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeApp === 'react' ? 'bg-purple-100 text-purple-700' : 'text-gray-700 hover:text-primary-600'}`}
                     >
                       ⚛️ React Remote
                     </Link>
                     <Link
                       to="/vue"
-                      className="text-gray-700 hover:text-primary-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                      onClick={() => setActiveApp('vue')}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${activeApp === 'vue' ? 'bg-green-100 text-green-700' : 'text-gray-700 hover:text-primary-600'}`}
                     >
                       🌟 Vue Remote
+                    </Link>
+                    <Link
+                      to="/conflict"
+                      className="text-orange-600 hover:text-orange-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      ⚠️ Conflict Test
                     </Link>
                   </div>
                 )}
@@ -139,6 +182,26 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Conflict Test Routes - Same path, different remotes */}
+              <Route
+                path="/conflict"
+                element={
+                  <ProtectedRoute>
+                    <ConflictTestPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Shared routes - same URL, app decided by ?app= param */}
+              <Route
+                path="/shared/*"
+                element={
+                  <ProtectedRoute>
+                    <SharedRoute />
+                  </ProtectedRoute>
+                }
+              />
             </Routes>
           </Suspense>
         </main>
@@ -152,7 +215,6 @@ function App() {
           </div>
         </footer>
       </div>
-    </BrowserRouter>
   );
 }
 
@@ -239,6 +301,150 @@ function HomePage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ConflictTestPage() {
+  return (
+    <div className="space-y-6">
+      <div className="card border-2 border-orange-300 bg-orange-50">
+        <h1 className="text-2xl font-bold text-orange-800 mb-4">
+          ⚠️ Routing Conflict Test
+        </h1>
+        <p className="text-orange-700 mb-4">
+          This page demonstrates what happens when multiple MFE remotes have the same route paths.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Scenario 1 */}
+        <div className="card">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+            Scenario 1: Prefixed Routes (Current Setup)
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Routes are namespaced by app prefix. No conflicts possible.
+          </p>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded font-mono">/react/settings</span>
+              <span className="text-gray-500">→ React Remote</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 bg-green-100 text-green-700 rounded font-mono">/vue/settings</span>
+              <span className="text-gray-500">→ Vue Remote</span>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Link to="/react/settings" className="px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700">
+              Open React Settings
+            </Link>
+            <Link to="/vue/settings" className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+              Open Vue Settings
+            </Link>
+          </div>
+        </div>
+
+        {/* Scenario 2 */}
+        <div className="card border-2 border-yellow-200 bg-yellow-50">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+            Scenario 2: Same URL, Different Apps (Query Param)
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Both apps claim <code className="bg-gray-100 px-1 rounded">/shared/settings</code>.
+            Use <code className="bg-gray-100 px-1 rounded">?app=react</code> or <code className="bg-gray-100 px-1 rounded">?app=vue</code> to choose.
+          </p>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded font-mono">/shared/settings?app=react</span>
+              <span className="text-gray-500">→ React Settings</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-1 bg-green-100 text-green-700 rounded font-mono">/shared/settings?app=vue</span>
+              <span className="text-gray-500">→ Vue Settings</span>
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <Link to="/shared/settings?app=react" className="px-3 py-2 bg-purple-600 text-white rounded text-sm hover:bg-purple-700">
+              React Settings
+            </Link>
+            <Link to="/shared/settings?app=vue" className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700">
+              Vue Settings
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Explanation */}
+      <div className="card bg-blue-50 border border-blue-200">
+        <h2 className="text-lg font-semibold text-blue-800 mb-3">
+          💡 How to Handle Route Conflicts
+        </h2>
+        <ul className="space-y-2 text-blue-700">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-500 mt-1">1.</span>
+            <span><strong>Namespace by prefix</strong> - Use /react/*, /vue/* (recommended)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-500 mt-1">2.</span>
+            <span><strong>Redirect aliases</strong> - Map /settings → /react/settings for user convenience</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-500 mt-1">3.</span>
+            <span><strong>Central route registry</strong> - Host manages all routes, remotes expose components only</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-500 mt-1">4.</span>
+            <span><strong>Route manifest</strong> - Remotes declare routes, host resolves conflicts at build time</span>
+          </li>
+        </ul>
+      </div>
+
+      {/* Code Example */}
+      <div className="card bg-gray-900 text-gray-100">
+        <h2 className="text-lg font-semibold text-white mb-3">
+          📝 Implementation Code
+        </h2>
+        <pre className="text-sm overflow-x-auto"><code>{`// SharedRoute component - decides app based on query param
+function SharedRoute() {
+  const [searchParams] = useSearchParams();
+  const appParam = searchParams.get('app'); // 'react' or 'vue'
+
+  if (appParam === 'vue') {
+    return <VueRemoteLazy />;
+  }
+  return <ReactRemoteApp />; // Default
+}
+
+// Route definition
+<Route path="/shared/*" element={<SharedRoute />} />`}</code></pre>
+      </div>
+
+      {/* Alternative Solutions */}
+      <div className="card">
+        <h2 className="text-lg font-semibold text-gray-800 mb-3">
+          🔧 Other Solutions for Route Conflicts
+        </h2>
+        <div className="grid md:grid-cols-2 gap-4 text-sm">
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-700">1. Hash-based</strong>
+            <p className="text-gray-600 mt-1">/settings#react vs /settings#vue</p>
+          </div>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-700">2. Subdomain</strong>
+            <p className="text-gray-600 mt-1">react.app.com/settings vs vue.app.com/settings</p>
+          </div>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-700">3. Session Context</strong>
+            <p className="text-gray-600 mt-1">Remember last visited app, use that for /settings</p>
+          </div>
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <strong className="text-gray-700">4. Route Registry</strong>
+            <p className="text-gray-600 mt-1">Build-time conflict detection, fail if duplicate routes</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

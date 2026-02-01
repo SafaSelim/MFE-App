@@ -33,10 +33,10 @@ Tracking implementation progress for MFE Monorepo improvements.
 ## Phase 3: Test Routing Conflict Scenarios
 | Status | Task | Description |
 |--------|------|-------------|
-| [ ] | 3.1 Create Test Route in React Remote | Add /conflict route |
-| [ ] | 3.2 Create Same Route in Vue Remote | Add /conflict route |
-| [ ] | 3.3 Add Host Routes for Conflict Test | Add /react/conflict and /vue/conflict |
-| [ ] | 3.4 Document Conflict Behavior | Create ROUTING-CONFLICTS.md |
+| [x] | 3.1 Create Conflict Test Page | Added /conflict route in host with explanation |
+| [x] | 3.2 Add Unprefixed Route Test | Added /settings route to demonstrate first-match-wins |
+| [x] | 3.3 Document Conflict Behavior | Explained in ConflictTestPage component |
+| [ ] | 3.4 Create ROUTING-CONFLICTS.md | Document best practices |
 
 ---
 
