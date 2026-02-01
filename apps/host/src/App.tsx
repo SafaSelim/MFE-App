@@ -7,12 +7,19 @@ import LoginPage from './pages/login-page';
 
 const ReactRemoteApp = lazy(() => import('reactRemote/App'));
 
-// Vue remote module (not lazy loaded - will be used by VueWrapper)
+// Vue remote module - loaded via dynamic ESM import (Module Federation v2)
 let vueRemoteModule: any = null;
-const loadVueRemote = () => import('vueRemote/App').then((m) => {
-  vueRemoteModule = m;
-  return m;
-});
+const loadVueRemote = async () => {
+  // Dynamic import of Vue remote's remoteEntry as ES module
+  // @ts-ignore - dynamic URL import
+  const remoteEntry = await import(/* webpackIgnore: true */ 'http://localhost:3002/remoteEntry.js');
+  // Initialize the remote container
+  await remoteEntry.init({});
+  // Get the exposed App module
+  const factory = await remoteEntry.get('./App');
+  vueRemoteModule = await factory();
+  return vueRemoteModule;
+};
 
 // Lazy wrapper component for Vue
 const VueRemoteLazy = lazy(() =>

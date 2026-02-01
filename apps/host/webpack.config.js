@@ -50,7 +50,7 @@ module.exports = {
       name: "host",
       remotes: {
         reactRemote: "reactRemote@http://localhost:3001/remoteEntry.js",
-        vueRemote: "vueRemote@http://localhost:3002/remoteEntry.js",
+        // Vue remote is loaded via dynamic import in VueWrapper (ESM compatibility)
       },
       shared: {
         react: {

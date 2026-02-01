@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import federation from '@originjs/vite-plugin-federation'
+import { federation } from '@module-federation/vite'
 
 export default defineConfig({
   plugins: [
@@ -13,9 +13,11 @@ export default defineConfig({
       },
       shared: {
         vue: {
+          singleton: true,
           requiredVersion: '^3.4.0',
         },
         'vue-router': {
+          singleton: true,
           requiredVersion: '^4.2.0',
         },
       },
@@ -36,7 +38,7 @@ export default defineConfig({
     },
   },
   build: {
-    target: 'esnext',
+    target: 'chrome89',
     minify: false,
     cssCodeSplit: false,
   },

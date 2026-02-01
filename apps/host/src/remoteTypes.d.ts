@@ -3,17 +3,17 @@ declare module 'reactRemote/App' {
   export default App;
 }
 
-declare module 'vueRemote/App' {
-  interface MountResult {
-    unmount: () => void;
-    setPath: (path: string) => void;
-  }
+// Vue remote types - loaded via dynamic ESM import
+interface VueRemoteMountResult {
+  unmount: () => void;
+  setPath: (path: string) => void;
+}
 
-  interface MountOptions {
-    initialPath?: string;
-    onNavigate?: (path: string) => void;
-  }
+interface VueRemoteMountOptions {
+  initialPath?: string;
+  onNavigate?: (path: string) => void;
+}
 
-  export function mount(el: HTMLElement, options?: MountOptions): MountResult;
-  export default any;
+interface VueRemoteModule {
+  mount: (el: HTMLElement, options?: VueRemoteMountOptions) => VueRemoteMountResult;
 }

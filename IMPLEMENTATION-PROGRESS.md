@@ -8,11 +8,12 @@ Tracking implementation progress for MFE Monorepo improvements.
 ## Phase 1: Fix Vue Remote Display Issue
 | Status | Task | Description |
 |--------|------|-------------|
-| [ ] | 1.1 Create Vue Remote Bridge Component | Create RemoteApp.ts that initializes Vue with router |
-| [ ] | 1.2 Update Vite Federation Config | Change exposed module to RemoteApp.ts |
-| [ ] | 1.3 Add vue-router to Host Shared Deps | Add vue-router singleton to webpack config |
-| [ ] | 1.4 Update VueWrapper Component | Handle new bridge component pattern |
-| [ ] | 1.5 Fix Vue Router Base Path | Use memory history for nested routing |
+| [x] | 1.1 Create Vue Remote Bridge Component | Create RemoteApp.ts that initializes Vue with router |
+| [x] | 1.2 Update Vite Federation Config | Switched to @module-federation/vite plugin |
+| [x] | 1.3 Add vue-router to Host Shared Deps | Add vue-router singleton to webpack config |
+| [x] | 1.4 Update VueWrapper Component | Handle new bridge component pattern |
+| [x] | 1.5 Fix Vue Router Base Path | Use memory history for nested routing |
+| [x] | 1.6 Fix ESM Loading | Load Vue remote via dynamic ESM import (Module Federation v2) |
 
 ---
 
