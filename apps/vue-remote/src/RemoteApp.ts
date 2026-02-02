@@ -26,6 +26,7 @@ const routes = [
 interface MountOptions {
   initialPath?: string
   onNavigate?: (path: string) => void
+  baseUrl?: string // Allow host to pass the base URL
 }
 
 interface MountResult {
@@ -37,10 +38,32 @@ let appInstance: VueApp | null = null
 let routerInstance: Router | null = null
 let linkElement: HTMLLinkElement | null = null
 
-const VUE_REMOTE_BASE_URL = 'http://localhost:3002'
+// Detect the base URL for this remote
+function getBaseUrl(): string {
+  // Try to detect from current script (works when loaded via Module Federation)
+  if (typeof document !== 'undefined') {
+    const scripts = document.querySelectorAll('script[src*="vueRemote"]')
+    if (scripts.length > 0) {
+      const src = (scripts[0] as HTMLScriptElement).src
+      return src.substring(0, src.lastIndexOf('/'))
+    }
+
+    // Fallback: check for remoteEntry script
+    const remoteEntry = document.querySelector('script[src*="remoteEntry"]')
+    if (remoteEntry) {
+      const src = (remoteEntry as HTMLScriptElement).src
+      if (src.includes('3002') || src.includes('vue')) {
+        return src.substring(0, src.lastIndexOf('/'))
+      }
+    }
+  }
+
+  // Default to localhost for development
+  return 'http://localhost:3002'
+}
 
 // Inject CSS link into the document
-function injectStyles() {
+function injectStyles(baseUrl: string) {
   if (typeof document === 'undefined') return
 
   // Check if already injected
@@ -50,7 +73,7 @@ function injectStyles() {
 
   linkElement = document.createElement('link')
   linkElement.rel = 'stylesheet'
-  linkElement.href = `${VUE_REMOTE_BASE_URL}/assets/style.css`
+  linkElement.href = `${baseUrl}/assets/style.css`
   linkElement.setAttribute('data-vue-remote', '')
   document.head.appendChild(linkElement)
 }
@@ -64,10 +87,13 @@ function removeStyles() {
 }
 
 export function mount(el: HTMLElement, options: MountOptions = {}): MountResult {
-  const { initialPath = '/', onNavigate } = options
+  const { initialPath = '/', onNavigate, baseUrl } = options
+
+  // Use provided baseUrl or detect it
+  const effectiveBaseUrl = baseUrl || getBaseUrl()
 
   // Inject styles
-  injectStyles()
+  injectStyles(effectiveBaseUrl)
 
   // Create router with memory history for nested routing
   routerInstance = createRouter({

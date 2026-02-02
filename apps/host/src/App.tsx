@@ -15,12 +15,15 @@ const useMFEContext = () => useContext(MFEContext);
 
 const ReactRemoteApp = lazy(() => import('reactRemote/App'));
 
+// Vue remote URL - configurable via environment
+const VUE_REMOTE_URL = process.env.REACT_APP_VUE_REMOTE_URL || 'http://localhost:3002';
+
 // Vue remote module - loaded via dynamic ESM import (Module Federation v2)
 let vueRemoteModule: any = null;
 const loadVueRemote = async () => {
   // Dynamic import of Vue remote's remoteEntry as ES module
   // @ts-ignore - dynamic URL import
-  const remoteEntry = await import(/* webpackIgnore: true */ 'http://localhost:3002/remoteEntry.js');
+  const remoteEntry = await import(/* webpackIgnore: true */ `${VUE_REMOTE_URL}/remoteEntry.js`);
   // Initialize the remote container
   await remoteEntry.init({});
   // Get the exposed App module

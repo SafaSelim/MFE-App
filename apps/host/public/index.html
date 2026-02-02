@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MFE Host</title>
+    <script type="text/javascript">
+      // GitHub Pages SPA redirect handler
+      // Restores the path saved by 404.html
+      (function() {
+        var redirect = sessionStorage.getItem('spa-redirect');
+        if (redirect) {
+          sessionStorage.removeItem('spa-redirect');
+          window.history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
 </head>
 <body>
     <div id="root"></div>

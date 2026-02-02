@@ -55,14 +55,13 @@ Tracking implementation progress for MFE Monorepo improvements.
 ## Phase 5: GitHub Pages Deployment & CI/CD
 | Status | Task | Description |
 |--------|------|-------------|
-| [ ] | 5.1 Create Production Environment Config | Add env var support for remote URLs |
-| [ ] | 5.2 Configure Build Output Paths | Set publicPath for GitHub Pages |
-| [ ] | 5.3 Create GitHub Actions for Host | deploy-host.yml workflow |
-| [ ] | 5.4 Create GitHub Actions for React Remote | deploy-react-remote.yml workflow |
-| [ ] | 5.5 Create GitHub Actions for Vue Remote | deploy-vue-remote.yml workflow |
-| [ ] | 5.6 Create Combined CI Workflow | ci.yml for PR checks |
-| [ ] | 5.7 Update Module Federation URLs | Config for dev/prod remote URLs |
-| [ ] | 5.8 Test Production Build Locally | Verify builds and federation work |
+| [x] | 5.1 Create Production Environment Config | .env.production with remote URLs |
+| [x] | 5.2 Configure Build Output Paths | webpack/vite configs with publicPath |
+| [x] | 5.3 Create GitHub Actions Workflows | ci.yml + deploy.yml |
+| [x] | 5.4 Configure All Apps for Production | Host, React Remote, Vue Remote |
+| [x] | 5.5 Add SPA Support for GitHub Pages | 404.html redirect hack |
+| [x] | 5.6 Update Module Federation URLs | Environment-based remote URLs |
+| [x] | 5.7 Test Production Build Locally | All apps build successfully |
 
 ---
 

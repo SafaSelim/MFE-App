@@ -1,14 +1,27 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const webpack = require("webpack");
 const path = require("path");
-require("dotenv").config();
+
+// Load environment variables
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env';
+require("dotenv").config({ path: path.resolve(__dirname, envFile) });
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Remote URLs - configurable via environment
+const REACT_REMOTE_URL = process.env.REACT_APP_REACT_REMOTE_URL || 'http://localhost:3001';
+const VUE_REMOTE_URL = process.env.REACT_APP_VUE_REMOTE_URL || 'http://localhost:3002';
+const PUBLIC_PATH = process.env.PUBLIC_URL || (isProduction ? '/mfe-host/' : 'http://localhost:3000/');
 
 module.exports = {
-  mode: 'development',
+  mode: isProduction ? 'production' : 'development',
   output: {
-    publicPath: "http://localhost:3000/",
+    publicPath: PUBLIC_PATH,
     path: path.resolve(__dirname, "dist"),
+    filename: isProduction ? '[name].[contenthash].js' : '[name].js',
+    clean: true,
   },
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
@@ -51,7 +64,7 @@ module.exports = {
     new ModuleFederationPlugin({
       name: "host",
       remotes: {
-        reactRemote: "reactRemote@http://localhost:3001/remoteEntry.js",
+        reactRemote: `reactRemote@${REACT_REMOTE_URL}/remoteEntry.js`,
         // Vue remote is loaded via dynamic import in VueWrapper (ESM compatibility)
       },
       shared: {
@@ -90,6 +103,19 @@ module.exports = {
       "process.env.REACT_APP_BFF_URL": JSON.stringify(
         process.env.REACT_APP_BFF_URL || "http://localhost:3003"
       ),
+      "process.env.REACT_APP_VUE_REMOTE_URL": JSON.stringify(VUE_REMOTE_URL),
     }),
+    // Copy 404.html for GitHub Pages SPA support
+    ...(isProduction ? [
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: path.resolve(__dirname, 'public/404.html'),
+            to: '404.html',
+            noErrorOnMissing: true,
+          },
+        ],
+      }),
+    ] : []),
   ],
 };

@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Host
+        run: npm run build --workspace=@mfe/host
+        env:
+          NODE_ENV: production
+          REACT_APP_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          REACT_APP_REACT_REMOTE_URL: https://${{ github.repository_owner }}.github.io/mfe-react-remote
+          REACT_APP_VUE_REMOTE_URL: https://${{ github.repository_owner }}.github.io/mfe-vue-remote
+          PUBLIC_URL: /mfe-host
+
+      - name: Build React Remote
+        run: npm run build --workspace=@mfe/react-remote
+        env:
+          NODE_ENV: production
+          PUBLIC_URL: /mfe-react-remote
+
+      - name: Build Vue Remote
+        run: npm run build --workspace=@mfe/vue-remote
+        env:
+          NODE_ENV: production
+          BASE_URL: /mfe-vue-remote/
+
+      - name: Upload Host Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: host-build
+          path: apps/host/dist
+
+      - name: Upload React Remote Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-remote-build
+          path: apps/react-remote/dist
+
+      - name: Upload Vue Remote Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vue-remote-build
+          path: apps/vue-remote/dist

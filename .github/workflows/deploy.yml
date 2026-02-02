@@ -1,0 +1,81 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Build all apps with production URLs
+      - name: Build Host
+        run: npm run build --workspace=@mfe/host
+        env:
+          NODE_ENV: production
+          REACT_APP_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          REACT_APP_REACT_REMOTE_URL: https://${{ github.repository_owner }}.github.io/mfe-monorepo/react-remote
+          REACT_APP_VUE_REMOTE_URL: https://${{ github.repository_owner }}.github.io/mfe-monorepo/vue-remote
+          PUBLIC_URL: /mfe-monorepo/
+
+      - name: Build React Remote
+        run: npm run build --workspace=@mfe/react-remote
+        env:
+          NODE_ENV: production
+          PUBLIC_URL: /mfe-monorepo/react-remote/
+
+      - name: Build Vue Remote
+        run: npm run build --workspace=@mfe/vue-remote
+        env:
+          NODE_ENV: production
+          BASE_URL: /mfe-monorepo/vue-remote/
+
+      # Combine all builds into a single directory
+      - name: Prepare deployment
+        run: |
+          mkdir -p deploy
+          cp -r apps/host/dist/* deploy/
+          mkdir -p deploy/react-remote
+          cp -r apps/react-remote/dist/* deploy/react-remote/
+          mkdir -p deploy/vue-remote
+          cp -r apps/vue-remote/dist/* deploy/vue-remote/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: deploy
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -2,11 +2,16 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 const ModuleFederationPlugin = require("webpack/lib/container/ModuleFederationPlugin");
 const path = require("path");
 
+const isProduction = process.env.NODE_ENV === 'production';
+const PUBLIC_PATH = process.env.PUBLIC_URL || (isProduction ? '/mfe-react-remote/' : 'http://localhost:3001/');
+
 module.exports = {
-  mode: 'development',
+  mode: isProduction ? 'production' : 'development',
   output: {
-    publicPath: "http://localhost:3001/",
+    publicPath: PUBLIC_PATH,
     path: path.resolve(__dirname, "dist"),
+    filename: isProduction ? '[name].[contenthash].js' : '[name].js',
+    clean: true,
   },
   resolve: {
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],

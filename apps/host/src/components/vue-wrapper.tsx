@@ -10,8 +10,12 @@ interface VueRemoteModule {
   mount: (el: HTMLElement, options?: {
     initialPath?: string;
     onNavigate?: (path: string) => void;
+    baseUrl?: string;
   }) => MountResult;
 }
+
+// Vue remote URL from environment
+const VUE_REMOTE_URL = process.env.REACT_APP_VUE_REMOTE_URL || 'http://localhost:3002';
 
 interface VueWrapperProps {
   vueModule: VueRemoteModule;
@@ -49,6 +53,7 @@ export default function VueWrapper({ vueModule, basePath }: VueWrapperProps) {
 
       mountResultRef.current = vueModule.mount(containerRef.current, {
         initialPath: initialSubPath,
+        baseUrl: VUE_REMOTE_URL,
         onNavigate: (vuePath: string) => {
           // When Vue navigates internally, update React Router
           // Use refs to get current values (avoid stale closure)
