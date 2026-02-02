@@ -10,7 +10,9 @@
     "start:host": "npm run start --workspace=@mfe/host",
     "start:react-remote": "npm run start --workspace=@mfe/react-remote",
     "start:vue-remote": "npm run dev --workspace=@mfe/vue-remote",
+    "start:bff": "npm run dev --workspace=@mfe/bff-server",
     "start:all": "concurrently -n \"HOST,REACT,VUE\" -c \"bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm:start:host\" \"npm:start:react-remote\" \"npm:start:vue-remote\"",
+    "start:all:bff": "concurrently -n \"BFF,HOST,REACT,VUE\" -c \"bgYellow.bold,bgBlue.bold,bgMagenta.bold,bgGreen.bold\" \"npm:start:bff\" \"npm:start:host\" \"npm:start:react-remote\" \"npm:start:vue-remote\"",
     "build:all": "npm run build --workspaces",
     "clean": "rm -rf apps/*/node_modules packages/*/node_modules node_modules"
   },

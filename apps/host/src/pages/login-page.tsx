@@ -1,47 +1,32 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
-import { useAuth, User } from '@mfe/auth-sdk';
-
-interface GoogleJwtPayload {
-  sub: string;
-  email: string;
-  name: string;
-  picture: string;
-  given_name?: string;
-  family_name?: string;
-}
+import { useAuth } from '@mfe/auth-sdk';
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  const handleGoogleSuccess = (credentialResponse: CredentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {
       setError('No credential received from Google');
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      const decoded = jwtDecode<GoogleJwtPayload>(credentialResponse.credential);
-
-      const user: User = {
-        id: decoded.sub,
-        username: decoded.email.split('@')[0],
-        email: decoded.email,
-        name: decoded.name,
-        picture: decoded.picture,
-        roles: ['user'],
-        provider: 'google',
-      };
-
-      login(credentialResponse.credential, user);
+      // Use BFF-aware login method (handles both BFF and legacy modes)
+      await loginWithGoogle(credentialResponse.credential);
       navigate('/');
     } catch (err) {
-      setError('Failed to process Google login');
+      setError('Failed to process Google login. Please try again.');
       console.error('Google login error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -75,6 +60,13 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="mb-6 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+            </div>
+          )}
+
           {/* Google Sign In */}
           <div className="flex justify-center">
             <GoogleLogin
@@ -88,11 +80,19 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Info */}
+          {/* Security Info */}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm text-blue-800 text-center">
-              Sign in with your Google account to access all micro frontend applications
-            </p>
+            <div className="flex items-start gap-2">
+              <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <div>
+                <p className="text-sm text-blue-800 font-medium">Secure Authentication</p>
+                <p className="text-xs text-blue-700 mt-1">
+                  Your session is protected with httpOnly cookies and CSRF tokens
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

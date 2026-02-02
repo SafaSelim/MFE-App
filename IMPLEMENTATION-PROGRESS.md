@@ -36,21 +36,44 @@ Tracking implementation progress for MFE Monorepo improvements.
 | [x] | 3.1 Create Conflict Test Page | Added /conflict route in host with explanation |
 | [x] | 3.2 Add Unprefixed Route Test | Added /settings route to demonstrate first-match-wins |
 | [x] | 3.3 Document Conflict Behavior | Explained in ConflictTestPage component |
-| [ ] | 3.4 Create ROUTING-CONFLICTS.md | Document best practices |
+| [x] | 3.4 Create ROUTING-CONFLICTS.md | Document best practices |
 
 ---
 
-## Phase 4: GitHub Pages Deployment & CI/CD
+## Phase 4: Secure Token Management (BFF Pattern)
 | Status | Task | Description |
 |--------|------|-------------|
-| [ ] | 4.1 Create Production Environment Config | Add env var support for remote URLs |
-| [ ] | 4.2 Configure Build Output Paths | Set publicPath for GitHub Pages |
-| [ ] | 4.3 Create GitHub Actions for Host | deploy-host.yml workflow |
-| [ ] | 4.4 Create GitHub Actions for React Remote | deploy-react-remote.yml workflow |
-| [ ] | 4.5 Create GitHub Actions for Vue Remote | deploy-vue-remote.yml workflow |
-| [ ] | 4.6 Create Combined CI Workflow | ci.yml for PR checks |
-| [ ] | 4.7 Update Module Federation URLs | Config for dev/prod remote URLs |
-| [ ] | 4.8 Test Production Build Locally | Verify builds and federation work |
+| [x] | 4.1 Create BFF Server | Express server with cookie-based auth (packages/bff-server) |
+| [x] | 4.2 Implement Token Exchange | BFF handles OAuth, returns httpOnly cookie |
+| [x] | 4.3 Update Auth SDK | Add BFFAuthService + useAuth with BFF support |
+| [x] | 4.4 Create Auth Proxy Routes | /api/auth/* endpoints (google, me, logout, refresh) |
+| [x] | 4.5 Update Login Page | Uses loginWithGoogle method (BFF-aware) |
+| [x] | 4.6 Add CSRF Protection | CSRF tokens generated per session |
+
+---
+
+## Phase 5: GitHub Pages Deployment & CI/CD
+| Status | Task | Description |
+|--------|------|-------------|
+| [ ] | 5.1 Create Production Environment Config | Add env var support for remote URLs |
+| [ ] | 5.2 Configure Build Output Paths | Set publicPath for GitHub Pages |
+| [ ] | 5.3 Create GitHub Actions for Host | deploy-host.yml workflow |
+| [ ] | 5.4 Create GitHub Actions for React Remote | deploy-react-remote.yml workflow |
+| [ ] | 5.5 Create GitHub Actions for Vue Remote | deploy-vue-remote.yml workflow |
+| [ ] | 5.6 Create Combined CI Workflow | ci.yml for PR checks |
+| [ ] | 5.7 Update Module Federation URLs | Config for dev/prod remote URLs |
+| [ ] | 5.8 Test Production Build Locally | Verify builds and federation work |
+
+---
+
+## Phase 6: Azure SSO Integration
+| Status | Task | Description |
+|--------|------|-------------|
+| [ ] | 6.1 Install MSAL Libraries | Add @azure/msal-browser and @azure/msal-react |
+| [ ] | 6.2 Create Azure Auth Config | Configure tenant, client ID, scopes |
+| [ ] | 6.3 Add MSAL Provider | Wrap app with MsalProvider |
+| [ ] | 6.4 Update Login Page | Add Azure SSO button |
+| [ ] | 6.5 Handle Azure Token Flow | Process Azure tokens in Auth SDK |
 
 ---
 

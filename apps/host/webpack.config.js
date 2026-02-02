@@ -84,6 +84,12 @@ module.exports = {
       "process.env.REACT_APP_GOOGLE_CLIENT_ID": JSON.stringify(
         process.env.REACT_APP_GOOGLE_CLIENT_ID || ""
       ),
+      "process.env.REACT_APP_USE_BFF": JSON.stringify(
+        process.env.REACT_APP_USE_BFF || "false"
+      ),
+      "process.env.REACT_APP_BFF_URL": JSON.stringify(
+        process.env.REACT_APP_BFF_URL || "http://localhost:3003"
+      ),
     }),
   ],
 };
