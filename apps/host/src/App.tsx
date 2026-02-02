@@ -29,12 +29,15 @@ const loadVueRemote = async () => {
   return vueRemoteModule;
 };
 
-// Lazy wrapper component for Vue
-const VueRemoteLazy = lazy(() =>
+// Lazy wrapper component for Vue (with configurable basePath)
+const createVueRemote = (basePath: string) => lazy(() =>
   loadVueRemote().then(() => ({
-    default: () => <VueWrapper vueModule={vueRemoteModule} basePath="/vue" />,
+    default: () => <VueWrapper vueModule={vueRemoteModule} basePath={basePath} />,
   }))
 );
+
+const VueRemoteLazy = createVueRemote('/vue');
+const VueRemoteRoot = createVueRemote('/test-root'); // Same base as the route for root-level testing
 
 // Shared route component - decides which app based on query param or context
 function SharedRoute() {
@@ -49,6 +52,59 @@ function SharedRoute() {
     return <VueRemoteLazy />;
   }
   return <ReactRemoteApp />;
+}
+
+// Root level test - both apps at same route, no prefix
+function RootLevelTest() {
+  const [currentApp, setCurrentApp] = useState<'react' | 'vue'>('react');
+
+  return (
+    <div className="space-y-4">
+      {/* App Switcher */}
+      <div className="bg-orange-100 border-2 border-orange-300 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-orange-800">Root Level Test (No Prefix)</h3>
+            <p className="text-sm text-orange-600">
+              Current URL: <code className="bg-orange-200 px-1 rounded">/test-root/*</code> -
+              Both apps share this route!
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentApp('react')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                currentApp === 'react'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-white text-purple-600 border border-purple-300'
+              }`}
+            >
+              ⚛️ React App
+            </button>
+            <button
+              onClick={() => setCurrentApp('vue')}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                currentApp === 'vue'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-white text-green-600 border border-green-300'
+              }`}
+            >
+              🌟 Vue App
+            </button>
+          </div>
+        </div>
+        <p className="text-xs text-orange-700 mt-2">
+          ⚠️ Notice: When you navigate inside the app (e.g., click Settings), the URL stays at /test-root/* level.
+          The internal routing is handled by each app's router.
+        </p>
+      </div>
+
+      {/* App Container */}
+      <Suspense fallback={<div className="text-center py-8">Loading {currentApp} app...</div>}>
+        {currentApp === 'react' ? <ReactRemoteApp /> : <VueRemoteRoot />}
+      </Suspense>
+    </div>
+  );
 }
 
 function App() {
@@ -112,6 +168,12 @@ function AppContent() {
                       className="text-orange-600 hover:text-orange-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                     >
                       ⚠️ Conflict Test
+                    </Link>
+                    <Link
+                      to="/test-root"
+                      className="text-red-600 hover:text-red-700 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                    >
+                      🔴 Root Test
                     </Link>
                   </div>
                 )}
@@ -193,12 +255,12 @@ function AppContent() {
                 }
               />
 
-              {/* Shared routes - same URL, app decided by ?app= param */}
+              {/* ROOT LEVEL TEST - No prefix, toggle between apps */}
               <Route
-                path="/shared/*"
+                path="/test-root/*"
                 element={
                   <ProtectedRoute>
-                    <SharedRoute />
+                    <RootLevelTest />
                   </ProtectedRoute>
                 }
               />
