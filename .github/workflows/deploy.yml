@@ -38,21 +38,21 @@ jobs:
         env:
           NODE_ENV: production
           REACT_APP_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          REACT_APP_REACT_REMOTE_URL: https://${{ github.repository_owner }}.github.io/mfe-monorepo/react-remote
-          REACT_APP_VUE_REMOTE_URL: https://${{ github.repository_owner }}.github.io/mfe-monorepo/vue-remote
-          PUBLIC_URL: /mfe-monorepo/
+          REACT_APP_REACT_REMOTE_URL: https://${{ github.repository_owner }}.github.io/MFE-App/react-remote
+          REACT_APP_VUE_REMOTE_URL: https://${{ github.repository_owner }}.github.io/MFE-App/vue-remote
+          PUBLIC_URL: /MFE-App/
 
       - name: Build React Remote
         run: npm run build --workspace=@mfe/react-remote
         env:
           NODE_ENV: production
-          PUBLIC_URL: /mfe-monorepo/react-remote/
+          PUBLIC_URL: /MFE-App/react-remote/
 
       - name: Build Vue Remote
         run: npm run build --workspace=@mfe/vue-remote
         env:
           NODE_ENV: production
-          BASE_URL: /mfe-monorepo/vue-remote/
+          BASE_URL: /MFE-App/vue-remote/
 
       # Combine all builds into a single directory
       - name: Prepare deployment

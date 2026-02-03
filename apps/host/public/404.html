@@ -7,7 +7,7 @@
       // GitHub Pages SPA redirect hack
       // Stores the path in sessionStorage and redirects to index.html
       // index.html then reads and restores the path
-      var pathSegmentsToKeep = 1; // Keep /mfe-host/ prefix
+      var pathSegmentsToKeep = 1; // Keep /MFE-App/ prefix
       var l = window.location;
       sessionStorage.setItem('spa-redirect', l.pathname + l.search + l.hash);
       l.replace(
