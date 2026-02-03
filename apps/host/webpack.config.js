@@ -13,7 +13,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Remote URLs - configurable via environment
 const REACT_REMOTE_URL = process.env.REACT_APP_REACT_REMOTE_URL || 'http://localhost:3001';
 const VUE_REMOTE_URL = process.env.REACT_APP_VUE_REMOTE_URL || 'http://localhost:3002';
-const PUBLIC_PATH = process.env.PUBLIC_URL || (isProduction ? '/mfe-host/' : 'http://localhost:3000/');
+const PUBLIC_PATH = process.env.PUBLIC_URL ? `${process.env.PUBLIC_URL}/` : (isProduction ? '/MFE-App/' : 'http://localhost:3000/');
+const BASENAME = process.env.PUBLIC_URL || (isProduction ? '/MFE-App' : '');
 
 module.exports = {
   mode: isProduction ? 'production' : 'development',
@@ -104,6 +105,7 @@ module.exports = {
         process.env.REACT_APP_BFF_URL || "http://localhost:3003"
       ),
       "process.env.REACT_APP_VUE_REMOTE_URL": JSON.stringify(VUE_REMOTE_URL),
+      "process.env.REACT_APP_BASENAME": JSON.stringify(BASENAME),
     }),
     // Copy 404.html for GitHub Pages SPA support
     ...(isProduction ? [

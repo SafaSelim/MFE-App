@@ -18,6 +18,9 @@ const ReactRemoteApp = lazy(() => import('reactRemote/App'));
 // Vue remote URL - configurable via environment
 const VUE_REMOTE_URL = process.env.REACT_APP_VUE_REMOTE_URL || 'http://localhost:3002';
 
+// Base path for router (for GitHub Pages deployment)
+const BASENAME = process.env.REACT_APP_BASENAME || '';
+
 // Vue remote module - loaded via dynamic ESM import (Module Federation v2)
 let vueRemoteModule: any = null;
 const loadVueRemote = async () => {
@@ -115,7 +118,7 @@ function App() {
 
   return (
     <MFEContext.Provider value={{ activeApp, setActiveApp }}>
-      <BrowserRouter>
+      <BrowserRouter basename={BASENAME}>
         <AppContent />
       </BrowserRouter>
     </MFEContext.Provider>
