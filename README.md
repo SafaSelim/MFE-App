@@ -2,7 +2,7 @@
 
 A **Micro Frontend (MFE) Monorepo** demonstrating Module Federation across React and Vue frameworks with shared authentication.
 
-**Live Demo:** [https://SafaSelim.github.io/MFE-App/](https://SafaSelim.github.io/MFE-App/)
+**Live Demo:** [https://SafaSelim.github.io](https://SafaSelim.github.io/)
 
 ---
 
